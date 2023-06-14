@@ -127,8 +127,35 @@ const updateUI = acc => {
   calcDisplayInterest(acc);
 };
 
+let currentAccount, timer;
+
+//logout timer
+
+const startLogOutTimer = function () {
+  let time = 120;
+
+  const showTime = function () {
+    const min = String(Math.floor(time / 60)).padStart(2, '0');
+    const seconds = String(time % 60).padStart(2, '0');
+
+    labelTimer.textContent = `${min}:${seconds}`;
+
+    if (time === 0) {
+      clearInterval(timer);
+      labelWelcome.textContent = 'Log in to get started';
+      containerApp.style.opacity = '0';
+    }
+
+    time--;
+  };
+
+  showTime();
+  const timer = setInterval(showTime, 1000);
+
+  return timer;
+};
+
 // login event handlers
-let currentAccount;
 
 btnLogin.addEventListener('click', event => {
   event.preventDefault();
@@ -150,6 +177,9 @@ btnLogin.addEventListener('click', event => {
     inputLoginPin.blur();
     inputLoginUsername.blur();
 
+    if (timer) clearInterval(timer);
+
+    timer = startLogOutTimer();
     updateUI(currentAccount);
   }
 });
@@ -177,6 +207,23 @@ btnTransfer.addEventListener('click', event => {
     receiverAcc.movements.push(amount);
     updateUI(currentAccount);
   }
+});
+
+const resetIntervalAction = () => {
+  clearInterval(timer);
+  timer = startLogOutTimer();
+};
+
+addEventListener('mousemove', () => {
+  resetIntervalAction();
+});
+
+document.addEventListener('keypress', () => {
+  resetIntervalAction();
+});
+
+document.addEventListener('click', () => {
+  resetIntervalAction();
 });
 
 //request loan
@@ -358,5 +405,7 @@ console.log('ok dogs:', okDogs);
 // 8.
 console.log('8:');
 console.log(dogs);
-const sortedDogs = dogs.slice().sort((a, b) => a.recommendedFood - b.recommendedFood);
+const sortedDogs = dogs
+  .slice()
+  .sort((a, b) => a.recommendedFood - b.recommendedFood);
 console.log(sortedDogs);
